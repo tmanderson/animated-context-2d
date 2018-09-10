@@ -98,6 +98,7 @@ export default class AnimatedPath2D {
 
     // First draw ALL paths that have completed...
     this.instructions.slice(0, this.progress).forEach(inst => {
+
       ctx.beginPath();
       let prevPoint: [number, number] = [
         this.position[0] + inst.points[0][0],
@@ -105,7 +106,7 @@ export default class AnimatedPath2D {
       ];
 
       inst.points.slice(1).forEach(nextPoint => {
-        ctx[inst.method](...prevPoint.concat(nextPoint), ...inst.additionalArgs);
+        ctx[inst.method](...prevPoint.concat(nextPoint), ...(inst.additionalArgs || []));
 
         prevPoint = [
           this.position[0] + nextPoint[0],
@@ -113,8 +114,8 @@ export default class AnimatedPath2D {
         ];
       });
 
-      if (inst.method === 'moveTo') this.position = prevPoint;
-      else ctx.stroke();
+      this.position = prevPoint;
+      ctx.stroke();
     });
 
     if (this.complete || this.progress >= this.instructions.length) {
@@ -133,12 +134,12 @@ export default class AnimatedPath2D {
     currentInstruction.points.slice(0, currentInstruction.progress + 1)
       .forEach((point, i, instructions) => {
         const nextPoint = [ this.position[0] + point[0], this.position[1] + point[1] ];
-        ctx[currentInstruction.method](...prevPoint.concat(nextPoint), ...currentInstruction.additionalArgs);
+        ctx[currentInstruction.method](...prevPoint.concat(nextPoint), ...(currentInstruction.additionalArgs || []));
         prevPoint = nextPoint;
       });
 
-    if (currentInstruction.method === 'moveTo') this.position = prevPoint;
-    else ctx.stroke();
+    this.position = prevPoint;
+    ctx.stroke();
 
     currentInstruction.progress += 1;
 

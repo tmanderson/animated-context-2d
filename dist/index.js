@@ -118,16 +118,14 @@ System.register("AnimatedPath", ["Easing"], function (exports_2, context_2) {
                             _this.position[1] + inst.points[0][1]
                         ];
                         inst.points.slice(1).forEach(function (nextPoint) {
-                            ctx[inst.method].apply(ctx, prevPoint.concat(nextPoint).concat(inst.additionalArgs));
+                            ctx[inst.method].apply(ctx, prevPoint.concat(nextPoint).concat((inst.additionalArgs || [])));
                             prevPoint = [
                                 _this.position[0] + nextPoint[0],
                                 _this.position[1] + nextPoint[1]
                             ];
                         });
-                        if (inst.method === 'moveTo')
-                            _this.position = prevPoint;
-                        else
-                            ctx.stroke();
+                        _this.position = prevPoint;
+                        ctx.stroke();
                     });
                     if (this.complete || this.progress >= this.instructions.length) {
                         this.complete = true;
@@ -142,13 +140,11 @@ System.register("AnimatedPath", ["Easing"], function (exports_2, context_2) {
                     currentInstruction.points.slice(0, currentInstruction.progress + 1)
                         .forEach(function (point, i, instructions) {
                         var nextPoint = [_this.position[0] + point[0], _this.position[1] + point[1]];
-                        ctx[currentInstruction.method].apply(ctx, prevPoint.concat(nextPoint).concat(currentInstruction.additionalArgs));
+                        ctx[currentInstruction.method].apply(ctx, prevPoint.concat(nextPoint).concat((currentInstruction.additionalArgs || [])));
                         prevPoint = nextPoint;
                     });
-                    if (currentInstruction.method === 'moveTo')
-                        this.position = prevPoint;
-                    else
-                        ctx.stroke();
+                    this.position = prevPoint;
+                    ctx.stroke();
                     currentInstruction.progress += 1;
                     if (currentInstruction.progress >= currentInstruction.points.length)
                         this.progress += 1;
