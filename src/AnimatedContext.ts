@@ -42,7 +42,7 @@ export default class AnimatedContext2D {
 
   set fillStyle(color:string) {
     if (this.currentPath) this.currentPath.fillStyle = color;
-    this.attributes.fillStyle = color;
+    else this.attributes.fillStyle = color;
   }
 
   get fillStyle():string {
