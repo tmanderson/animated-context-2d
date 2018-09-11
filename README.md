@@ -14,9 +14,7 @@ specification of duration and easing function given to `beginPath`)
 ```js
 <script src="https://unpkg.com/systemjs@0.21.4/dist/system.src.js"></script>
 <script>
-  SystemJS.import('AnimatedContext').then(AnimatedContext => {
-    const ctx = new AnimatedContext(canvas);
-
+  SystemJS.import('AnimatedContext').then(({ default: AnimatedContext }) => {
     const ctx = new AnimatedContext(canvas);
 
     ctx.beginPath(500, AnimatedContext.EASE.OUT_CUBIC);
