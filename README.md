@@ -59,7 +59,9 @@ ctx.stroke();
 - [x] `lineTo`
 - [x] `arc`
 - [ ] `arcTo`
-- [ ] `lineWidth`
+- [x] `lineWidth`
+- [x] `lineCap`
+- [x] `miterLimit`
 - [ ] `transform`
 - [ ] `translate`
 - [ ] `rotate`
