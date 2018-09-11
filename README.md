@@ -12,34 +12,29 @@ with the pre-existing `CanvasRenderingContext2D` API (only difference is the
 specification of duration and easing function given to `beginPath`)
 
 ```js
-<script src="https://unpkg.com/systemjs@0.21.4/dist/system.src.js"></script>
-<script>
-  SystemJS.import('AnimatedContext').then(({ default: AnimatedContext }) => {
-    const ctx = new AnimatedContext(canvas);
+const ctx = new AnimatedContext2D(canvas);
 
-    ctx.beginPath(500, AnimatedContext.EASE.OUT_CUBIC);
-    ctx.strokeStyle = 'blue';
-    ctx.lineTo(canvas.width/2, canvas.height/2);
-    ctx.stroke();
-    ctx.strokeStyle = 'red';
-    ctx.arc(50);
-    ctx.stroke();
-    ctx.fill();
-    ctx.strokeStyle = 'green';
-    ctx.lineTo(canvas.width, 0);
-    ctx.stroke();
+ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC);
+ctx.strokeStyle = 'blue';
+ctx.lineTo(canvas.width/2, canvas.height/2);
+ctx.stroke();
+ctx.strokeStyle = 'red';
+ctx.arc(50);
+ctx.stroke();
+ctx.fill();
+ctx.strokeStyle = 'green';
+ctx.lineTo(canvas.width, 0);
+ctx.stroke();
 
-    ctx.beginPath(2000, AnimatedContext.EASE.OUT_QUARTIC); // Note: the extra arguments
-    ctx.moveTo(canvas.width, canvas.height);
-    ctx.lineTo(canvas.width/2, canvas.height/2);
-    ctx.stroke();
+ctx.beginPath(2000, AnimatedContext2D.EASE.OUT_QUARTIC); // Note: the extra arguments
+ctx.moveTo(canvas.width, canvas.height);
+ctx.lineTo(canvas.width/2, canvas.height/2);
+ctx.stroke();
 
-    ctx.beginPath(1000, AnimatedContext.EASE.IN_QUARTIC); // Note: the extra arguments
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width/2, canvas.height/2);
-    ctx.stroke();
-  });
-</script>
+ctx.beginPath(1000, AnimatedContext2D.EASE.IN_QUARTIC); // Note: the extra arguments
+ctx.moveTo(0, canvas.height);
+ctx.lineTo(canvas.width/2, canvas.height/2);
+ctx.stroke();
 ```
 
 ## Easing functions
