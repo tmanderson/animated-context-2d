@@ -77,8 +77,7 @@ function () {
       return this.attributes.fillStyle;
     },
     set: function set(color) {
-      if (this.currentPath) this.currentPath.fillStyle = color;
-      this.attributes.fillStyle = color;
+      if (this.currentPath) this.currentPath.fillStyle = color;else this.attributes.fillStyle = color;
     },
     enumerable: true,
     configurable: true
