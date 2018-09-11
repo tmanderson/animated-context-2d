@@ -14,24 +14,24 @@ specification of duration and easing function given to `beginPath`)
 ```js
 const ctx = new AnimatedContext2D(canvas);
 
-ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC);
-ctx.strokeStyle = 'blue';
-ctx.lineTo(canvas.width/2, canvas.height/2);
-ctx.stroke();
+ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
 ctx.strokeStyle = 'red';
+ctx.lineWidth = 2;
+ctx.lineTo(canvas.width/2, canvas.height/2);
 ctx.arc(50);
-ctx.stroke();
-ctx.fill();
-ctx.strokeStyle = 'green';
 ctx.lineTo(canvas.width, 0);
 ctx.stroke();
 
 ctx.beginPath(2000, AnimatedContext2D.EASE.OUT_QUARTIC); // Note: the extra arguments
+ctx.strokeStyle = 'green';
+ctx.lineWidth = 10;
 ctx.moveTo(canvas.width, canvas.height);
 ctx.lineTo(canvas.width/2, canvas.height/2);
 ctx.stroke();
 
 ctx.beginPath(1000, AnimatedContext2D.EASE.IN_QUARTIC); // Note: the extra arguments
+ctx.strokeStyle = 'blue';
+ctx.lineWidth = 5;
 ctx.moveTo(0, canvas.height);
 ctx.lineTo(canvas.width/2, canvas.height/2);
 ctx.stroke();

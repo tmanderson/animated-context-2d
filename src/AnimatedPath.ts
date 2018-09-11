@@ -1,21 +1,13 @@
+import { PathAttributes, Context2DLineCap, Context2DLineJoin } from './constants';
 import ease, { EASE } from './Easing';
 import AnimatedContext2D from './AnimatedContext';
 import PathInstruction from './PathInstruction';
-
-interface PathAttributes {
-  fill?: boolean;
-  fillStyle?: string;
-  stroke?: boolean;
-  strokeStyle?: string;
-  size?: number;
-  radius?: number;
-}
 
 const interpolate = (frames: number, easing: EASE, getPoint: Function): [number, number][] =>
   new Array(frames).fill(0).reduce((points, v, i) => points.concat([getPoint(ease[easing](i / (frames - 1)), i, points)]), []);
 
 export default class AnimatedPath2D {
-  defaultAttributes: PathAttributes;
+  attributes: PathAttributes;
   animate: boolean = true;
 
   ctx: AnimatedContext2D;
@@ -31,35 +23,69 @@ export default class AnimatedPath2D {
   complete: boolean = false;
 
   set fillStyle(color:string) {
-    this.defaultAttributes.fillStyle = color;
+    this.attributes.fillStyle = color;
   }
 
   get fillStyle(): string {
-    return this.defaultAttributes.fillStyle;
+    return this.attributes.fillStyle;
   }
 
   set strokeStyle(color:string) {
-    this.defaultAttributes.strokeStyle = color;
+    this.attributes.strokeStyle = color;
   }
 
   get strokeStyle(): string {
-    return this.defaultAttributes.strokeStyle;
+    return this.attributes.strokeStyle;
+  }
+
+  set lineWidth(width: number) {
+    this.attributes.lineWidth = width;
+  }
+
+  get lineWidth(): number {
+    return this.attributes.lineWidth;
+  }
+
+  set lineCap(cap: Context2DLineCap) {
+    this.attributes.lineCap = cap;
+  }
+
+  get lineCap(): Context2DLineCap {
+    return this.attributes.lineCap;
+  }
+
+  set lineJoin(join: Context2DLineJoin) {
+    this.attributes.lineJoin = join;
+  }
+
+  get lineJoin(): Context2DLineJoin {
+    return this.attributes.lineJoin;
+  }
+
+  set miterLimit(limit: number) {
+    this.attributes.miterLimit = limit;
+  }
+
+  get miterLimit(): number {
+    return this.attributes.miterLimit;
   }
 
   constructor(duration: number, easing: EASE, context: AnimatedContext2D) {
     this.ctx = context;
-    this.defaultAttributes = { fillStyle: this.ctx.fillStyle, strokeStyle: this.ctx.strokeStyle };
     this.duration = duration;
     this.progress = 0;
     this.easing = easing;
     this.instructions = [];
+    this.attributes = context.attributes.clone();
   }
 
   moveTo(x: number, y: number) {
     this.instructions.push(
-      new PathInstruction('moveTo', [[x, y]])
+      new PathInstruction('moveTo', [[x, y]], this.attributes.clone())
     );
+
     this.position = [ x, y ];
+
     return this;
   }
 
@@ -74,7 +100,7 @@ export default class AnimatedPath2D {
           this.position[0] - this.position[0] * t + x * t,
           this.position[1] - this.position[1] * t + y * t,
         ]),
-        { ...this.defaultAttributes }
+        this.attributes.clone()
       )
     );
 
@@ -91,6 +117,8 @@ export default class AnimatedPath2D {
 
   arc(r: number, a1: number = 0, a2: number = 2 * Math.PI, duration: number = this.duration) {
     const frames = Math.round(duration * this.ctx.fpms);
+    const attributes = this.attributes.clone();
+    attributes.radius = r;
 
     this.instructions.push(
       new PathInstruction(
@@ -100,7 +128,7 @@ export default class AnimatedPath2D {
           i ? points[i - 1][1] : a1,
           (a2 - a1) * t
         ]),
-        { radius: r }
+        attributes
       )
     );
 
@@ -108,27 +136,15 @@ export default class AnimatedPath2D {
   }
 
   stroke() {
-    const currentInstruction = this.instructions[this.instructions.length - 1];
-
-    if (currentInstruction) {
-      currentInstruction.attributes.stroke = true;
-      currentInstruction.attributes.strokeStyle = this.strokeStyle;
-    } else {
-      this.defaultAttributes.stroke = true;
-      this.defaultAttributes.strokeStyle = this.strokeStyle;
-    }
+    this.attributes.stroke = true;
+    this.attributes.strokeStyle = this.strokeStyle;
+    return this;
   }
 
   fill() {
-    const currentInstruction = this.instructions[this.instructions.length - 1];
-
-    if (currentInstruction) {
-      currentInstruction.attributes.fill = true;
-      currentInstruction.attributes.fillStyle = this.fillStyle;
-    } else {
-      this.defaultAttributes.fill = true;
-      this.defaultAttributes.fillStyle = this.fillStyle;
-    }
+    this.attributes.fill = true;
+    this.attributes.fillStyle = this.fillStyle;
+    return this;
   }
 
   executeInstruction(ctx: CanvasRenderingContext2D, instruction: PathInstruction) {
@@ -155,13 +171,16 @@ export default class AnimatedPath2D {
       // If we're on the last `point` in the instruction, check for stroke and fill
       // attributes
       if (i === points.length - 1) {
-        if (instruction.attributes.fill) {
-          ctx.fillStyle = instruction.attributes.fillStyle;
+        if (this.attributes.fill) {
+          ctx.fillStyle = this.attributes.fillStyle;
           ctx.fill();
         }
 
-        if (instruction.attributes.stroke) {
-          ctx.strokeStyle = instruction.attributes.strokeStyle;
+        if (this.attributes.stroke) {
+          ctx.strokeStyle = this.attributes.strokeStyle;
+          ctx.lineWidth = this.attributes.lineWidth;
+          ctx.lineCap = this.attributes.lineCap;
+          ctx.lineJoin = this.attributes.lineJoin;
           ctx.stroke();
         }
       }
@@ -200,5 +219,6 @@ export default class AnimatedPath2D {
 
   reset() {
     this.progress = 0;
+    this.instructions.forEach(instruction => instruction.reset());
   }
 }

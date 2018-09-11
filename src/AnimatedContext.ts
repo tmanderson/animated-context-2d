@@ -1,3 +1,4 @@
+import { PathAttributes, Context2DLineCap, Context2DLineJoin } from './constants';
 import { EASE } from './Easing';
 import AnimatedPath2D from './AnimatedPath';
 
@@ -37,29 +38,64 @@ export default class AnimatedContext2D {
    * @type {AnimatedPath2D}
    */
   currentPath: AnimatedPath2D;
-
-  _strokeStyle: string = 'rgba(0, 0, 0, 1)';
-  _fillStyle: string = 'rgba(255, 255, 255, 1)';
+  attributes: PathAttributes;
 
   set fillStyle(color:string) {
     if (this.currentPath) this.currentPath.fillStyle = color;
-    else this._fillStyle = color;
+    this.attributes.fillStyle = color;
   }
 
   get fillStyle():string {
-    return this._fillStyle;
+    return this.attributes.fillStyle;
   }
 
   set strokeStyle(color:string) {
     if (this.currentPath) this.currentPath.strokeStyle = color;
-    else this._strokeStyle = color;
+    this.attributes.strokeStyle = color;
   }
 
   get strokeStyle():string {
-    return this._strokeStyle;
+    return this.attributes.strokeStyle;
   }
 
-  constructor(canvas: HTMLCanvasElement, FPS: number = 60, defaultEasing: EASE = EASE.LINEAR) {
+  set lineWidth(width: number) {
+    if (this.currentPath) this.currentPath.lineWidth = width;
+    this.attributes.lineWidth = width;
+  }
+
+  get lineWidth(): number {
+    return this.attributes.lineWidth;
+  }
+
+  set lineCap(cap: Context2DLineCap) {
+    if (this.currentPath) this.currentPath.lineCap = cap;
+    this.attributes.lineCap = cap;
+  }
+
+  get lineCap(): Context2DLineCap {
+    return this.attributes.lineCap;
+  }
+
+  set lineJoin(join: Context2DLineJoin) {
+    if (this.currentPath) this.currentPath.lineJoin = join;
+    this.attributes.lineJoin = join;
+  }
+
+  get lineJoin(): Context2DLineJoin {
+    return this.attributes.lineJoin;
+  }
+
+  set miterLimit(limit: number) {
+    if (this.currentPath) this.currentPath.miterLimit = limit;
+    this.attributes.miterLimit = limit;
+  }
+
+  get miterLimit(): number {
+    return this.attributes.miterLimit;
+  }
+
+  constructor(canvas: HTMLCanvasElement, defaultEasing: EASE = EASE.LINEAR, FPS: number = 60) {
+    this.attributes = new PathAttributes();
     this.canvas = canvas;
     this.paths = [];
     this.ctx = canvas.getContext('2d');
@@ -75,27 +111,27 @@ export default class AnimatedContext2D {
   }
 
   arc(...args:[number, number, number, number]) {
-    this.currentPath.arc(...args); // tslint:disable-line
+    this.currentPath.arc(...args);
   }
 
   arcTo(...args:[number, number, number, number, number]) {
-    this.currentPath.arcTo(...args); // tslint:disable-line
+    this.currentPath.arcTo(...args);
   }
 
   lineTo(...args:[number, number]) {
-    this.currentPath.lineTo(...args); // tslint:disable-line
+    this.currentPath.lineTo(...args);
   }
 
   moveTo(...args:[number, number]) {
-    this.currentPath.moveTo(...args); // tslint:disable-line
+    this.currentPath.moveTo(...args);
   }
 
   stroke() {
-    this.currentPath.stroke();
+    this.currentPath.stroke().reset();
   }
 
   fill() {
-    this.currentPath.fill();
+    this.currentPath.fill().reset();
   }
 
   start() {

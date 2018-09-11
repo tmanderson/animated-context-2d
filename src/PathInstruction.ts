@@ -1,11 +1,4 @@
-interface PathAttributes {
-  fill?: boolean;
-  fillStyle?: string;
-  stroke?: boolean;
-  strokeStyle?: string;
-  size?: number;
-  radius?: number;
-}
+import { PathAttributes } from './constants';
 
 export default class PathInstruction {
   static instances: number = 0;
@@ -27,11 +20,11 @@ export default class PathInstruction {
     return points;
   }
 
-  constructor(method: string, points: [number, number][], attributes?: PathAttributes) {
+  constructor(method: string, points: [number, number][], attributes: PathAttributes) {
     this.id = ++PathInstruction.instances;
     this.method = method;
     this._points = points;
-    this.attributes = attributes || {};
+    this.attributes = attributes;
   }
 
   next() {
@@ -40,5 +33,9 @@ export default class PathInstruction {
 
   point() {
     return this._points[this.i];
+  }
+
+  reset() {
+    this.i = 0;
   }
 }
