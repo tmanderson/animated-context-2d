@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>ANIMATED CONTEXT</title>
-  <script src="https://unpkg.com/systemjs@0.21.4/dist/system.src.js"></script>
+
   <style>
     html, body, canvas {
       height: 100vh;
@@ -12,40 +12,36 @@
   </style>
 </head>
   <canvas></canvas>
-  <script src="dist/index.js"></script>
+  <script src="dist/AnimatedContext2D.min.js"></script>
   <script>
     const canvas = document.querySelector('canvas');
     canvas.height = document.body.offsetHeight;
     canvas.width = document.body.offsetWidth;
 
-    SystemJS.import('AnimatedContext').then(ctx => setTimeout(() => init(ctx), 1000));
+    const ctx = new AnimatedContext2D(canvas);
 
-    function init({ default: AnimatedContext }) {
-      const ctx = new AnimatedContext(canvas);
+    ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC);
+    ctx.strokeStyle = 'blue';
+    ctx.lineTo(canvas.width/2, canvas.height/2);
+    ctx.stroke();
+    ctx.strokeStyle = 'red';
+    ctx.arc(50);
+    ctx.stroke();
+    ctx.fill();
+    ctx.strokeStyle = 'green';
+    ctx.lineTo(canvas.width, 0);
+    ctx.stroke();
 
-      ctx.beginPath(500, AnimatedContext.EASE.OUT_CUBIC);
-      ctx.strokeStyle = 'blue';
-      ctx.lineTo(canvas.width/2, canvas.height/2);
-      ctx.stroke();
-      ctx.strokeStyle = 'red';
-      ctx.arc(50);
-      ctx.stroke();
-      ctx.fill();
-      ctx.strokeStyle = 'green';
-      ctx.lineTo(canvas.width, 0);
-      ctx.stroke();
+    ctx.beginPath(2000, AnimatedContext2D.EASE.OUT_QUARTIC); // Note: the extra arguments
+    ctx.moveTo(canvas.width, canvas.height);
+    ctx.lineTo(canvas.width/2, canvas.height/2);
+    ctx.stroke();
 
-      ctx.beginPath(2000, AnimatedContext.EASE.OUT_QUARTIC); // Note: the extra arguments
-      ctx.moveTo(canvas.width, canvas.height);
-      ctx.lineTo(canvas.width/2, canvas.height/2);
-      ctx.stroke();
+    ctx.beginPath(1000, AnimatedContext2D.EASE.IN_QUARTIC); // Note: the extra arguments
+    ctx.moveTo(0, canvas.height);
+    ctx.lineTo(canvas.width/2, canvas.height/2);
+    ctx.stroke();
 
-      ctx.beginPath(1000, AnimatedContext.EASE.IN_QUARTIC); // Note: the extra arguments
-      ctx.moveTo(0, canvas.height);
-      ctx.lineTo(canvas.width/2, canvas.height/2);
-      ctx.stroke();
-
-      ctx.start();
-    }
+    ctx.start();
   </script>
 </html>

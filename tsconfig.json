@@ -1,17 +1,12 @@
 {
   "compilerOptions": {
-    "sourceMap": false,
-    "module": "none",
+    "sourceMap": true,
+    "module": "CommonJS",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES5",
-    "lib": [ "dom", "es6" ]
+    "target": "ES2015",
+    "lib": [ "dom", "es2015" ],
+    "outDir": "lib"
   },
-  "include": [
-    "src"
-  ],
-  "outFile": "./dist/index.js",
-  "sourceRoot": "./src/",
-  "rootDir": "./src/",
-  "compileOnSave": false
+  "include": ["src"]
 }

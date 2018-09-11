@@ -4,16 +4,31 @@
   "description": "Animated canvas context 2D",
   "main": "dist/index.js",
   "scripts": {
-    "start": "npm run start:server && npm run start:ts",
+    "start": "parallelshell \"npm run start:server\" \"npm run start:ts\"",
     "start:server": "php -S localhost:8080",
     "start:ts": "tsc src/AnimatedContext.ts --outFile dist/index.js --noUnusedLocals -m system --target ES2015 -w",
-    "build": "tsc src/AnimatedContext.ts --outFile dist/index.js --noUnusedLocals -m system --target ES5",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:tsc": "tsc -m commonjs --target es5",
+    "build:babel": "babel -o ./dist/AnimatedContext2D.tmp.js ./lib",
+    "build:browser": "browserify -s AnimatedContext2D -e ./lib/index.js -o ./dist/AnimatedContext2D.js -t [ babelify --presets [env] ]",
+    "build:uglify": "uglifyjs ./dist/AnimatedContext2D.js > ./dist/AnimatedContext2D.min.js",
+    "build:exports": "cp src/index.js lib/index.js",
+    "build": "yarn prebuild && yarn build:tsc && yarn build:exports && yarn build:browser && yarn build:uglify && yarn postbuild",
+    "prebuild": "rimraf dist lib",
+    "postbuild": "rimraf lib ./dist/AnimatedContext2D.tmp.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.2",
+    "parallelshell": "^3.0.2",
+    "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
-    "typescript": "^3.0.3"
+    "typescript": "^3.0.3",
+    "uglify-js": "^3.4.9"
   }
 }
