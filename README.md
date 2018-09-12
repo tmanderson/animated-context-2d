@@ -47,10 +47,8 @@ ctx.stroke();
 - [x] `OUT_QUARTIC`
 - [x] `IN_SINE`
 - [x] `OUT_SINE`
-- [ ] `BOUNCE_IN`
-- [ ] `BOUNCE_OUT`
-- [ ] `ELASTIC_IN`
-- [ ] `ELASTIC_OUT`
+- [x] `IN_EXPO`
+- [x] `OUT_EXPO`
 
 ## Implementation Status
 - [x] `moveTo`

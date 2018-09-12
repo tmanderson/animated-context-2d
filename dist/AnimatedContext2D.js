@@ -494,6 +494,8 @@ var EASE;
   EASE[EASE["OUT_QUARTIC"] = 6] = "OUT_QUARTIC";
   EASE[EASE["IN_SINE"] = 7] = "IN_SINE";
   EASE[EASE["OUT_SINE"] = 8] = "OUT_SINE";
+  EASE[EASE["IN_EXPO"] = 9] = "IN_EXPO";
+  EASE[EASE["OUT_EXPO"] = 10] = "OUT_EXPO";
 })(EASE = exports.EASE || (exports.EASE = {}));
 
 exports.default = (_a = {}, _a[EASE.LINEAR] = function (t) {
@@ -514,6 +516,10 @@ exports.default = (_a = {}, _a[EASE.LINEAR] = function (t) {
   return Math.sin(t * PI2);
 }, _a[EASE.OUT_SINE] = function (t) {
   return 1 - Math.sin((1 - t) * PI2);
+}, _a[EASE.IN_EXPO] = function (t) {
+  return Math.pow(Math.E, 5 * (t - 1));
+}, _a[EASE.OUT_EXPO] = function (t) {
+  return 1 - Math.pow(Math.E, -5 * t);
 }, _a);
 
 },{}],4:[function(require,module,exports){
