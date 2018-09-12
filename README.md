@@ -4,7 +4,12 @@ Liven up your `CanvasRenderingContext2D` sketches with a little animation.
 Animated Context 2D aims to implement the entirety of the CanvasRenderingContext2D
 [API](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D).
 
-![Example of Animated Context](./images/example.gif)
+<figure style="display:block">
+<img src="./images/example.gif" width="45%" alt="basic example" style="float:left;" />
+<img src="./images/example-tree.gif" width="45%" alt="tree example" style="float:right;" />
+</figure>
+
+---
 
 ## Example
 This example code is what is used in the above image. Notice it's nearly one-to-one
