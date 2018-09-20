@@ -19,25 +19,37 @@ const ctx = new AnimatedContext2D(canvas);
 ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
 ctx.strokeStyle = 'red';
 ctx.lineWidth = 2;
+ctx.translate(100, 100);
+ctx.rotate(Math.PI/4);
 ctx.lineTo(canvas.width/2, canvas.height/2);
 ctx.arc(50);
 ctx.lineTo(canvas.width, 0);
 ctx.stroke();
-
-ctx.beginPath(2000, AnimatedContext2D.EASE.OUT_QUARTIC); // Note: the extra arguments
-ctx.strokeStyle = 'green';
-ctx.lineWidth = 10;
-ctx.moveTo(canvas.width, canvas.height);
-ctx.lineTo(canvas.width/2, canvas.height/2);
-ctx.stroke();
-
-ctx.beginPath(1000, AnimatedContext2D.EASE.IN_QUARTIC); // Note: the extra arguments
-ctx.strokeStyle = 'blue';
-ctx.lineWidth = 5;
-ctx.moveTo(0, canvas.height);
-ctx.lineTo(canvas.width/2, canvas.height/2);
-ctx.stroke();
 ```
+
+### API
+
+### `class AnimatedContext2D(canvasElement, defaultEasing: EASE, FPS: number = 60)`
+
+- `canvasElement` a `HTMLCanvasElement`
+- `defaultEasing` the default easing function to use for all paths
+- `FPS` frames-per-second. Defaults to 60
+
+#### `AnimatedContext2D.beginPath(duration: number, easing: EASE)`
+
+- `duration` in milliseconds.
+- `easing` is any of [these](#easing-functions). Defaults to `AnimatedContext2D.defaultEasing`
+
+The duration and easing are used for each path instruction. So the following
+
+```js
+ctx.beginPath(500, "in.quad");
+ctx.lineTo(10, 10); // 500ms
+ctx.rect(0, 0, 100, 100); // 500ms
+ctx.fill();
+```
+
+would take 500ms to complete and both the `lineTo` and `rect` would use `EASE.IN_QUAD`.
 
 ## Easing functions
 - [x] `LINEAR`
@@ -63,6 +75,7 @@ ctx.stroke();
 - [x] `lineCap`
 - [x] `miterLimit`
 - [ ] `transform`
-- [ ] `translate`
-- [ ] `rotate`
-- [ ] `skew`
+- [x] `translate`
+- [x] `rotate`
+- [x] `skew`
+- [x] `rect`

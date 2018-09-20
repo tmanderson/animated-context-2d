@@ -1,5 +1,6 @@
 import { PathAttributes, Context2DLineCap, Context2DLineJoin } from './constants';
 import ease, { EASE } from './Easing';
+import TransformMatrix from './TransformMatrix';
 import AnimatedContext2D from './AnimatedContext';
 import PathInstruction from './PathInstruction';
 
@@ -9,6 +10,7 @@ const interpolate = (frames: number, easing: EASE, getPoint: Function): [number,
 export default class AnimatedPath2D {
   attributes: PathAttributes;
   animate: boolean = true;
+  transform: TransformMatrix;
 
   ctx: AnimatedContext2D;
 
@@ -19,6 +21,7 @@ export default class AnimatedPath2D {
   easing: EASE;
 
   progress: number;
+  transforms: PathInstruction[];
   instructions: PathInstruction[];
   complete: boolean = false;
 
@@ -73,9 +76,11 @@ export default class AnimatedPath2D {
   constructor(duration: number, easing: EASE, context: AnimatedContext2D) {
     this.ctx = context;
     this.duration = duration;
+    this.transform = new TransformMatrix();
     this.progress = 0;
     this.easing = easing;
     this.instructions = [];
+    this.transforms = [];
     this.attributes = context.attributes.clone();
   }
 
@@ -85,6 +90,73 @@ export default class AnimatedPath2D {
     );
 
     this.position = [ x, y ];
+
+    return this;
+  }
+
+  translate(x: number, y: number, duration: number = this.duration) {
+    const frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(
+      new PathInstruction(
+        'translate',
+        interpolate(frames, this.easing, (t, i) => [
+          // Easing position offset as well, this allows `lineTo` commands
+          // to execute relative to the current canvas position
+          this.position[0] - this.position[0] * t + x * t,
+          this.position[1] - this.position[1] * t + y * t,
+        ]),
+        this.attributes.clone()
+      )
+    );
+
+    return this;
+  }
+
+  scale(x: number, y: number, duration: number = this.duration) {
+    const frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(
+      new PathInstruction(
+        'skew',
+        interpolate(frames, this.easing, (t, i) => [
+          // Easing position offset as well, this allows `lineTo` commands
+          // to execute relative to the current canvas position
+          x * t,
+          y * t,
+        ]),
+        this.attributes.clone()
+      )
+    );
+
+    return this;
+  }
+
+  skew(x: number, y: number, duration: number = this.duration) {
+    const frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(
+      new PathInstruction(
+        'skew',
+        interpolate(frames, this.easing, (t, i) => [
+          x * t,
+          y * t,
+        ]),
+        this.attributes.clone()
+      )
+    );
+
+    return this;
+  }
+
+  rotate(a: number, duration: number = this.duration) {
+    const frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(
+      new PathInstruction(
+        'rotate',
+        interpolate(frames, this.easing, (t, i) => [
+          a * t
+        ]),
+        this.attributes.clone()
+      )
+    );
 
     return this;
   }
@@ -105,6 +177,26 @@ export default class AnimatedPath2D {
     );
 
     this.position = [ x, y ];
+
+    return this;
+  }
+
+  rect(x: number, y: number, w: number, h:number, duration: number = this.duration) {
+    const frames = Math.round(duration * this.ctx.fpms);
+    this.instructions.push(
+      new PathInstruction(
+        'rect',
+        interpolate(frames, this.easing, (t, i) => [
+          x, // (w * t)/2
+          y, // (h * t)/2
+          w * t,
+          h * t
+        ]),
+        this.attributes.clone()
+      )
+    );
+
+    this.position = [ x - w/2, y - h/2 ];
 
     return this;
   }
@@ -152,20 +244,28 @@ export default class AnimatedPath2D {
       if (i === 0) ctx.beginPath();
 
       switch(instruction.method) {
+        case 'translate': return this.transform.translate(point[0], point[1]);
+        case 'scale': return this.transform.scale(point[0], point[1]);
+        case 'skew': return this.transform.skew(point[0], point[1]);
+        case 'rotate': return this.transform.rotate(point[0]);
         case 'moveTo':
-          ctx.moveTo(...point);
-          this.position = point;
+          ctx.moveTo(point[0], point[1]);
+          this.position = [point[0], point[1]];
+        break;
+        case 'rect':
+          if (i === points.length - 1) ctx.rect(...point);
         break;
         case 'lineTo':
-          ctx.lineTo(...point);
-          this.position = point;
+          ctx.lineTo(point[0], point[1]);
+          this.position = [point[0], point[1]];
         break;
         case 'arc':
           ctx.arc(
             this.position[0],
             this.position[1],
             instruction.attributes.radius,
-            ...point
+            point[0],
+            point[1]
           );
       }
       // If we're on the last `point` in the instruction, check for stroke and fill
@@ -199,6 +299,10 @@ export default class AnimatedPath2D {
     ctx.strokeStyle = this.ctx.strokeStyle;
     this.position = this.origin;
 
+    this.transforms.forEach((inst, i) => {
+      this.executeInstruction(ctx, inst);
+    });
+    
     // First draw ALL paths that have completed...
     this.instructions.slice(0, this.progress).forEach((inst, i) => {
       ctx.beginPath();

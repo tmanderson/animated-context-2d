@@ -54,7 +54,15 @@ function () {
       _this.ctx.fillRect(0, 0, _this.ctx.canvas.width, _this.ctx.canvas.height);
 
       _this.paths.forEach(function (path) {
+        var _a;
+
+        _this.ctx.save();
+
+        (_a = _this.ctx).transform.apply(_a, path.transform.args());
+
         path.render(_this.ctx, _this.frame, _this.time);
+
+        _this.ctx.restore();
       });
 
       window.requestAnimationFrame(_this.tick);
@@ -199,12 +207,72 @@ function () {
     (_a = this.currentPath).moveTo.apply(_a, args);
   };
 
+  AnimatedContext2D.prototype.translate = function () {
+    var args = [];
+
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+
+    var _a;
+
+    (_a = this.currentPath).translate.apply(_a, args);
+  };
+
+  AnimatedContext2D.prototype.skew = function () {
+    var args = [];
+
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+
+    var _a;
+
+    (_a = this.currentPath).skew.apply(_a, args);
+  };
+
+  AnimatedContext2D.prototype.rect = function () {
+    var args = [];
+
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+
+    var _a;
+
+    (_a = this.currentPath).rect.apply(_a, args);
+  };
+
+  AnimatedContext2D.prototype.rotate = function (angle) {
+    this.currentPath.rotate(angle);
+  };
+
+  AnimatedContext2D.prototype.scale = function () {
+    var args = [];
+
+    for (var _i = 0; _i < arguments.length; _i++) {
+      args[_i] = arguments[_i];
+    }
+
+    var _a;
+
+    (_a = this.currentPath).scale.apply(_a, args);
+  };
+
   AnimatedContext2D.prototype.stroke = function () {
     this.currentPath.stroke().reset();
   };
 
   AnimatedContext2D.prototype.fill = function () {
     this.currentPath.fill().reset();
+  };
+
+  AnimatedContext2D.prototype.createLinearGradient = function (x0, y0, x1, y1) {
+    return this.ctx.createLinearGradient(x0, y0, x1, y1);
+  };
+
+  AnimatedContext2D.prototype.createRadialGradient = function (x0, y0, r0, x1, y1, r1) {
+    return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
   };
 
   AnimatedContext2D.prototype.start = function () {
@@ -223,7 +291,7 @@ function () {
 
 exports.default = AnimatedContext2D;
 
-},{"./AnimatedPath":2,"./Easing":3,"./constants":5}],2:[function(require,module,exports){
+},{"./AnimatedPath":2,"./Easing":3,"./constants":6}],2:[function(require,module,exports){
 "use strict";
 
 var __importDefault = undefined && undefined.__importDefault || function (mod) {
@@ -237,6 +305,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var Easing_1 = __importDefault(require("./Easing"));
+
+var TransformMatrix_1 = __importDefault(require("./TransformMatrix"));
 
 var PathInstruction_1 = __importDefault(require("./PathInstruction"));
 
@@ -256,9 +326,11 @@ function () {
     this.complete = false;
     this.ctx = context;
     this.duration = duration;
+    this.transform = new TransformMatrix_1.default();
     this.progress = 0;
     this.easing = easing;
     this.instructions = [];
+    this.transforms = [];
     this.attributes = context.attributes.clone();
   }
 
@@ -329,6 +401,60 @@ function () {
     return this;
   };
 
+  AnimatedPath2D.prototype.translate = function (x, y, duration) {
+    var _this = this;
+
+    if (duration === void 0) {
+      duration = this.duration;
+    }
+
+    var frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(new PathInstruction_1.default('translate', interpolate(frames, this.easing, function (t, i) {
+      return [// Easing position offset as well, this allows `lineTo` commands
+      // to execute relative to the current canvas position
+      _this.position[0] - _this.position[0] * t + x * t, _this.position[1] - _this.position[1] * t + y * t];
+    }), this.attributes.clone()));
+    return this;
+  };
+
+  AnimatedPath2D.prototype.scale = function (x, y, duration) {
+    if (duration === void 0) {
+      duration = this.duration;
+    }
+
+    var frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(new PathInstruction_1.default('skew', interpolate(frames, this.easing, function (t, i) {
+      return [// Easing position offset as well, this allows `lineTo` commands
+      // to execute relative to the current canvas position
+      x * t, y * t];
+    }), this.attributes.clone()));
+    return this;
+  };
+
+  AnimatedPath2D.prototype.skew = function (x, y, duration) {
+    if (duration === void 0) {
+      duration = this.duration;
+    }
+
+    var frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(new PathInstruction_1.default('skew', interpolate(frames, this.easing, function (t, i) {
+      return [x * t, y * t];
+    }), this.attributes.clone()));
+    return this;
+  };
+
+  AnimatedPath2D.prototype.rotate = function (a, duration) {
+    if (duration === void 0) {
+      duration = this.duration;
+    }
+
+    var frames = Math.round(duration * this.ctx.fpms);
+    this.transforms.push(new PathInstruction_1.default('rotate', interpolate(frames, this.easing, function (t, i) {
+      return [a * t];
+    }), this.attributes.clone()));
+    return this;
+  };
+
   AnimatedPath2D.prototype.lineTo = function (x, y, duration) {
     var _this = this;
 
@@ -343,6 +469,19 @@ function () {
       _this.position[0] - _this.position[0] * t + x * t, _this.position[1] - _this.position[1] * t + y * t];
     }), this.attributes.clone()));
     this.position = [x, y];
+    return this;
+  };
+
+  AnimatedPath2D.prototype.rect = function (x, y, w, h, duration) {
+    if (duration === void 0) {
+      duration = this.duration;
+    }
+
+    var frames = Math.round(duration * this.ctx.fpms);
+    this.instructions.push(new PathInstruction_1.default('rect', interpolate(frames, this.easing, function (t, i) {
+      return [x, y, w * t, h * t];
+    }), this.attributes.clone()));
+    this.position = [x - w / 2, y - h / 2];
     return this;
   };
 
@@ -394,18 +533,34 @@ function () {
       if (i === 0) ctx.beginPath();
 
       switch (instruction.method) {
+        case 'translate':
+          return _this.transform.translate(point[0], point[1]);
+
+        case 'scale':
+          return _this.transform.scale(point[0], point[1]);
+
+        case 'skew':
+          return _this.transform.skew(point[0], point[1]);
+
+        case 'rotate':
+          return _this.transform.rotate(point[0]);
+
         case 'moveTo':
-          ctx.moveTo.apply(ctx, point);
-          _this.position = point;
+          ctx.moveTo(point[0], point[1]);
+          _this.position = [point[0], point[1]];
+          break;
+
+        case 'rect':
+          if (i === points.length - 1) ctx.rect.apply(ctx, point);
           break;
 
         case 'lineTo':
-          ctx.lineTo.apply(ctx, point);
-          _this.position = point;
+          ctx.lineTo(point[0], point[1]);
+          _this.position = [point[0], point[1]];
           break;
 
         case 'arc':
-          ctx.arc.apply(ctx, [_this.position[0], _this.position[1], instruction.attributes.radius].concat(point));
+          ctx.arc(_this.position[0], _this.position[1], instruction.attributes.radius, point[0], point[1]);
       } // If we're on the last `point` in the instruction, check for stroke and fill
       // attributes
 
@@ -440,7 +595,10 @@ function () {
 
     ctx.fillStyle = this.ctx.fillStyle;
     ctx.strokeStyle = this.ctx.strokeStyle;
-    this.position = this.origin; // First draw ALL paths that have completed...
+    this.position = this.origin;
+    this.transforms.forEach(function (inst, i) {
+      _this.executeInstruction(ctx, inst);
+    }); // First draw ALL paths that have completed...
 
     this.instructions.slice(0, this.progress).forEach(function (inst, i) {
       ctx.beginPath();
@@ -472,7 +630,7 @@ function () {
 
 exports.default = AnimatedPath2D;
 
-},{"./Easing":3,"./PathInstruction":4}],3:[function(require,module,exports){
+},{"./Easing":3,"./PathInstruction":4,"./TransformMatrix":5}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -485,17 +643,17 @@ var PI2 = Math.PI / 2;
 var EASE;
 
 (function (EASE) {
-  EASE[EASE["LINEAR"] = 0] = "LINEAR";
-  EASE[EASE["IN_QUAD"] = 1] = "IN_QUAD";
-  EASE[EASE["OUT_QUAD"] = 2] = "OUT_QUAD";
-  EASE[EASE["IN_CUBIC"] = 3] = "IN_CUBIC";
-  EASE[EASE["OUT_CUBIC"] = 4] = "OUT_CUBIC";
-  EASE[EASE["IN_QUARTIC"] = 5] = "IN_QUARTIC";
-  EASE[EASE["OUT_QUARTIC"] = 6] = "OUT_QUARTIC";
-  EASE[EASE["IN_SINE"] = 7] = "IN_SINE";
-  EASE[EASE["OUT_SINE"] = 8] = "OUT_SINE";
-  EASE[EASE["IN_EXPO"] = 9] = "IN_EXPO";
-  EASE[EASE["OUT_EXPO"] = 10] = "OUT_EXPO";
+  EASE["LINEAR"] = "linear";
+  EASE["IN_QUAD"] = "in.quad";
+  EASE["OUT_QUAD"] = "out.quad";
+  EASE["IN_CUBIC"] = "in.cubic";
+  EASE["OUT_CUBIC"] = "out.cubic";
+  EASE["IN_QUARTIC"] = "in.quartic";
+  EASE["OUT_QUARTIC"] = "out.quartic";
+  EASE["IN_SINE"] = "in.sine";
+  EASE["OUT_SINE"] = "out.sine";
+  EASE["IN_EXPO"] = "in.expo";
+  EASE["OUT_EXPO"] = "out.expo";
 })(EASE = exports.EASE || (exports.EASE = {}));
 
 exports.default = (_a = {}, _a[EASE.LINEAR] = function (t) {
@@ -583,6 +741,99 @@ exports.default = PathInstruction;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var TransformMatrix =
+/** @class */
+function () {
+  function TransformMatrix() {
+    this._skew = [0, 0];
+    this._rotation = 0;
+    this._scale = [1, 1];
+    this._translation = [0, 0];
+    this.reset();
+  }
+
+  TransformMatrix.prototype.reset = function () {
+    this._skew = [0, 0];
+    this._rotation = 0;
+    this._scale = [1, 1];
+    this.rows = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  };
+
+  TransformMatrix.prototype.scale = function (x, y) {
+    if (x === void 0) {
+      x = 1;
+    }
+
+    if (y === void 0) {
+      y = x;
+    }
+
+    this._scale = [x, y];
+    this.update();
+  };
+
+  TransformMatrix.prototype.skew = function (x, y) {
+    if (x === void 0) {
+      x = 0;
+    }
+
+    if (y === void 0) {
+      y = 0;
+    }
+
+    this._skew = [x, y];
+    this.update();
+  };
+
+  TransformMatrix.prototype.translate = function (x, y) {
+    if (x === void 0) {
+      x = 0;
+    }
+
+    if (y === void 0) {
+      y = 0;
+    }
+
+    this.rows[2][0] = x;
+    this.rows[2][1] = y;
+  };
+
+  TransformMatrix.prototype.rotate = function (t) {
+    if (t === void 0) {
+      t = 0;
+    }
+
+    this._rotation = t;
+    this.update();
+  };
+
+  TransformMatrix.prototype.update = function () {
+    var x = this._scale[0],
+        y = this._scale[1];
+    var c = Math.cos(this._rotation),
+        s = Math.sin(this._rotation);
+    this.rows[0][0] = x * c;
+    this.rows[0][1] = y * (Math.tan(this._skew[1]) - s);
+    this.rows[1][0] = x * (Math.tan(this._skew[0]) + s);
+    this.rows[1][1] = y * c;
+  };
+
+  TransformMatrix.prototype.args = function () {
+    return [this.rows[0][0], this.rows[0][1], this.rows[1][0], this.rows[1][1], this.rows[2][0], this.rows[2][1]];
+  };
+
+  return TransformMatrix;
+}();
+
+exports.default = TransformMatrix;
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 var Context2DLineCap;
 
 (function (Context2DLineCap) {
@@ -631,7 +882,7 @@ function () {
 
 exports.PathAttributes = PathAttributes;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 var _AnimatedContext = require("./AnimatedContext");
@@ -642,5 +893,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 module.exports = _AnimatedContext2.default;
 
-},{"./AnimatedContext":1}]},{},[6])(6)
+},{"./AnimatedContext":1}]},{},[7])(7)
 });

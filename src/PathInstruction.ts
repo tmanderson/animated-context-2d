@@ -5,7 +5,7 @@ export default class PathInstruction {
 
   private id:number = 0;
   private i: number = 0;
-  private _points: [number, number][];
+  private _points: [number, number, number?, number?][];
 
   attributes: PathAttributes;
   method: string;

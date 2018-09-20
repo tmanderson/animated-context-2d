@@ -126,12 +126,40 @@ export default class AnimatedContext2D {
     this.currentPath.moveTo(...args);
   }
 
+  translate(...args:[number, number]) {
+    this.currentPath.translate(...args);
+  }
+
+  skew(...args:[number, number]) {
+    this.currentPath.skew(...args);
+  }
+
+  rect(...args:[number, number, number, number]) {
+    this.currentPath.rect(...args);
+  }
+
+  rotate(angle: number) {
+    this.currentPath.rotate(angle);
+  }
+
+  scale(...args:[number, number]) {
+    this.currentPath.scale(...args);
+  }
+
   stroke() {
     this.currentPath.stroke().reset();
   }
 
   fill() {
     this.currentPath.fill().reset();
+  }
+
+  createLinearGradient(x0:number, y0:number, x1:number, y1:number) {
+    return this.ctx.createLinearGradient(x0, y0, x1, y1);
+  }
+
+  createRadialGradient(x0:number, y0:number, r0: number, x1:number, y1:number, r1: number) {
+    return this.ctx.createRadialGradient(x0, y0, r0, x1, y1, r1);
   }
 
   start() {
@@ -148,7 +176,10 @@ export default class AnimatedContext2D {
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     this.paths.forEach(path => {
+      this.ctx.save();
+      this.ctx.transform(...path.transform.args());
       path.render(this.ctx, this.frame, this.time);
+      this.ctx.restore();
     });
 
     window.requestAnimationFrame(this.tick);

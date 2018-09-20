@@ -19,7 +19,7 @@
     canvas.width = document.body.offsetWidth;
 
     const ctx = new AnimatedContext2D(canvas);
-    ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
+    ctx.beginPath(500, "out.cubic"); // Note: the extra arguments
     ctx.strokeStyle = 'red';
     ctx.fillStyle = 'orange';
     ctx.lineWidth = 2;
@@ -29,18 +29,33 @@
     ctx.fill();
     ctx.stroke();
 
-    ctx.beginPath(2000, AnimatedContext2D.EASE.OUT_QUARTIC); // Note: the extra arguments
+    ctx.beginPath(2000, "out.quartic"); // Note: the extra arguments
+    ctx.translate(canvas.width/2, canvas.height/2); // applies to entire path over entire duration
+    // ctx.skew(Math.PI/4, 0);
+    ctx.rotate(3*Math.PI/4);
+    // ctx.scale(0.8, 0.5);
     ctx.strokeStyle = 'green';
     ctx.lineWidth = 10;
+    ctx.rect(-200, -200, 400, 400);
     ctx.moveTo(canvas.width, canvas.height);
-    ctx.lineTo(canvas.width/2, canvas.height/2);
+    ctx.lineTo(0, 0);
     ctx.stroke();
 
-    ctx.beginPath(1000, AnimatedContext2D.EASE.IN_QUARTIC); // Note: the extra arguments
+    ctx.beginPath(1000, "in.expo"); // Note: the extra arguments
     ctx.strokeStyle = 'blue';
     ctx.lineWidth = 5;
     ctx.moveTo(0, canvas.height);
     ctx.lineTo(canvas.width/2, canvas.height/2);
+    ctx.lineTo(canvas.width, canvas.height);
     ctx.stroke();
+
+    ctx.beginPath(2000, "out.expo");
+    const grad = ctx.createLinearGradient(canvas.width/2 - 150, canvas.height/2 - 150, canvas.width/2 + 150, canvas.height/2 + 150);
+    grad.addColorStop(0, '#333');
+    grad.addColorStop(1, '#AAA');
+    ctx.fillStyle = grad;
+    ctx.rotate(Math.PI/8);
+    ctx.rect(canvas.width/2 - 150, canvas.height/2 - 150, 300, 300);
+    ctx.fill();
   </script>
 </html>

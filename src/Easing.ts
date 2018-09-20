@@ -1,17 +1,17 @@
 const PI2 = Math.PI/2;
 
 export enum EASE {
-  LINEAR,
-  IN_QUAD,
-  OUT_QUAD,
-  IN_CUBIC,
-  OUT_CUBIC,
-  IN_QUARTIC,
-  OUT_QUARTIC,
-  IN_SINE,
-  OUT_SINE,
-  IN_EXPO,
-  OUT_EXPO
+  LINEAR="linear",
+  IN_QUAD="in.quad",
+  OUT_QUAD="out.quad",
+  IN_CUBIC="in.cubic",
+  OUT_CUBIC="out.cubic",
+  IN_QUARTIC="in.quartic",
+  OUT_QUARTIC="out.quartic",
+  IN_SINE="in.sine",
+  OUT_SINE="out.sine",
+  IN_EXPO="in.expo",
+  OUT_EXPO="out.expo"
 }
 
 export default {
