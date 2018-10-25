@@ -14,7 +14,7 @@ with the pre-existing `CanvasRenderingContext2D` API (only difference is the
 specification of duration and easing function given to `beginPath`)
 
 ```js
-const ctx = new AnimatedContext2D(canvas); // use this EXACTLY as you'd use `Context2D`, animatinos are FREE!
+const ctx = new AnimatedContext2D(canvas); // use this EXACTLY like `Context2D`, animations are FREE!
 
 ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
 ctx.strokeStyle = 'red';
