@@ -77,6 +77,13 @@ function () {
     this.fps = FPS;
     this.defaultEasing = defaultEasing;
     this.fpms = this.fps / 1000;
+
+    for (var k in this.ctx) {
+      if (k in this || typeof this.ctx[k] !== 'function') continue;
+      console.log("Adding method " + k + " from Context2D");
+      this[k] = this.ctx[k].bind(this.ctx);
+    }
+
     this.start();
   }
 

@@ -14,7 +14,7 @@ with the pre-existing `CanvasRenderingContext2D` API (only difference is the
 specification of duration and easing function given to `beginPath`)
 
 ```js
-const ctx = new AnimatedContext2D(canvas);
+const ctx = new AnimatedContext2D(canvas); // use this EXACTLY as you'd use `Context2D`, animatinos are FREE!
 
 ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
 ctx.strokeStyle = 'red';
@@ -64,7 +64,11 @@ would take 500ms to complete and both the `lineTo` and `rect` would use `EASE.IN
 - [x] `IN_EXPO`
 - [x] `OUT_EXPO`
 
-## Implementation Status
+## Animated Context2D Method Support
+All Context2D methods are available on the `AnimatedContext` instance, so you
+can use it just as you'd use `Context2D` itself. The methods listed below with
+are those that support (or will support) animations.
+
 - [x] `moveTo`
 - [x] `fillStyle`
 - [x] `lineStyle`
