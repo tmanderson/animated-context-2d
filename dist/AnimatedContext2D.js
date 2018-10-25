@@ -76,11 +76,10 @@ function () {
     this.ctx = canvas.getContext('2d');
     this.fps = FPS;
     this.defaultEasing = defaultEasing;
-    this.fpms = this.fps / 1000;
+    this.fpms = this.fps / 1000; // Adding any Context2D methods NOT handled by animated-context-2D
 
     for (var k in this.ctx) {
       if (k in this || typeof this.ctx[k] !== 'function') continue;
-      console.log("Adding method " + k + " from Context2D");
       this[k] = this.ctx[k].bind(this.ctx);
     }
 
