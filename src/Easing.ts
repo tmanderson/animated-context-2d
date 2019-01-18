@@ -16,11 +16,11 @@ export enum EASE {
 
 export default {
   [EASE.LINEAR]: (t: number) => t,
-  [EASE.IN_QUAD]: (t: number) => t * t,
+  [EASE.IN_QUAD]: (t: number) => t * t + 2 * t * (1 - t),
   [EASE.OUT_QUAD]: (t: number) => 1 - Math.pow(1 - t, 2),
   [EASE.IN_CUBIC]: (t: number) => t * t * t,
   [EASE.OUT_CUBIC]: (t: number) => 1 - Math.pow(1 - t, 3),
-  [EASE.IN_QUARTIC]: (t: number) => t * t * t * t,
+  [EASE.IN_QUARTIC]: (t: number) => t * t * t * t + (1 - t * t * t * t) * t,
   [EASE.OUT_QUARTIC]: (t: number) => 1 - Math.pow(1 - t, 4),
   [EASE.IN_SINE]: (t: number) => Math.sin(t * PI2),
   [EASE.OUT_SINE]: (t: number) => 1 - Math.sin((1 - t) * PI2),

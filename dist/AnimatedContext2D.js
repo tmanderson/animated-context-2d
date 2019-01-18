@@ -48,7 +48,7 @@ function () {
 
     this.tick = function (ts) {
       if (!_this.running) return;
-      if (ts - _this.time < _this.fpms) return window.requestAnimationFrame(_this.tick);
+      if (ts - _this.time < _this.frameRate) return window.requestAnimationFrame(_this.tick);
       _this.ctx.fillStyle = _this.fillStyle;
 
       _this.ctx.fillRect(0, 0, _this.ctx.canvas.width, _this.ctx.canvas.height);
@@ -76,7 +76,8 @@ function () {
     this.ctx = canvas.getContext('2d');
     this.fps = FPS;
     this.defaultEasing = defaultEasing;
-    this.fpms = this.fps / 1000; // Adding any Context2D methods NOT handled by animated-context-2D
+    this.fpms = this.fps / 1000;
+    this.frameRate = 1000 / this.fps; // Adding any Context2D methods NOT handled by animated-context-2D
 
     for (var k in this.ctx) {
       if (k in this || typeof this.ctx[k] !== 'function') continue;
@@ -172,9 +173,15 @@ function () {
       args[_i] = arguments[_i];
     }
 
-    var _a;
-
-    (_a = this.currentPath).arc.apply(_a, args);
+    var x = args[0],
+        y = args[1],
+        r = args[2],
+        startAngle = args[3],
+        endAngle = args[4],
+        anticlockwise = args[5],
+        duration = args[6];
+    this.currentPath.moveTo(x, y);
+    this.currentPath.arc(r, startAngle, endAngle, anticlockwise, duration);
   };
 
   AnimatedContext2D.prototype.arcTo = function () {
@@ -237,16 +244,8 @@ function () {
     (_a = this.currentPath).skew.apply(_a, args);
   };
 
-  AnimatedContext2D.prototype.rect = function () {
-    var args = [];
-
-    for (var _i = 0; _i < arguments.length; _i++) {
-      args[_i] = arguments[_i];
-    }
-
-    var _a;
-
-    (_a = this.currentPath).rect.apply(_a, args);
+  AnimatedContext2D.prototype.rect = function (x0, y0, w, h) {
+    this.currentPath.rect(x0, y0, w, h);
   };
 
   AnimatedContext2D.prototype.rotate = function (angle) {
@@ -318,7 +317,7 @@ var PathInstruction_1 = __importDefault(require("./PathInstruction"));
 
 var interpolate = function interpolate(frames, easing, getPoint) {
   return new Array(frames).fill(0).reduce(function (points, v, i) {
-    return points.concat([getPoint(Easing_1.default[easing](i / (frames - 1)), i, points)]);
+    return points.concat([getPoint(Easing_1.default[easing](i / (Math.max(2, frames) - 1)), i, points)]);
   }, []);
 };
 
@@ -414,7 +413,7 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(new PathInstruction_1.default('translate', interpolate(frames, this.easing, function (t, i) {
       return [// Easing position offset as well, this allows `lineTo` commands
       // to execute relative to the current canvas position
@@ -428,7 +427,7 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(new PathInstruction_1.default('skew', interpolate(frames, this.easing, function (t, i) {
       return [// Easing position offset as well, this allows `lineTo` commands
       // to execute relative to the current canvas position
@@ -442,7 +441,7 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(new PathInstruction_1.default('skew', interpolate(frames, this.easing, function (t, i) {
       return [x * t, y * t];
     }), this.attributes.clone()));
@@ -454,7 +453,7 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(new PathInstruction_1.default('rotate', interpolate(frames, this.easing, function (t, i) {
       return [a * t];
     }), this.attributes.clone()));
@@ -468,7 +467,7 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.instructions.push(new PathInstruction_1.default('lineTo', interpolate(frames, this.easing, function (t, i) {
       return [// Easing position offset as well, this allows `lineTo` commands
       // to execute relative to the current canvas position
@@ -483,21 +482,21 @@ function () {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     this.instructions.push(new PathInstruction_1.default('rect', interpolate(frames, this.easing, function (t, i) {
-      return [x, y, w * t, h * t];
+      return [x + w * (1 - t) / 2, y + h * (1 - t) / 2, w * t, h * t];
     }), this.attributes.clone()));
     this.position = [x - w / 2, y - h / 2];
     return this;
   };
 
   AnimatedPath2D.prototype.arcTo = function (x1, y1, x2, y2, r) {
-    // const frames = Math.round(duration * this.ctx.fpms);
+    // const frames = Math.ceil(duration * this.ctx.fpms);
     // TODO
     return this;
   };
 
-  AnimatedPath2D.prototype.arc = function (r, a1, a2, duration) {
+  AnimatedPath2D.prototype.arc = function (r, a1, a2, anticlockwise, duration) {
     if (a1 === void 0) {
       a1 = 0;
     }
@@ -506,16 +505,22 @@ function () {
       a2 = 2 * Math.PI;
     }
 
+    if (anticlockwise === void 0) {
+      anticlockwise = false;
+    }
+
     if (duration === void 0) {
       duration = this.duration;
     }
 
-    var frames = Math.round(duration * this.ctx.fpms);
+    var frames = Math.ceil(duration * this.ctx.fpms);
     var attributes = this.attributes.clone();
     attributes.radius = r;
+    attributes.anticlockwise = anticlockwise;
     this.instructions.push(new PathInstruction_1.default('arc', interpolate(frames, this.easing, function (t, i, points) {
-      return [// After first angle, the remaining just use the previous angle's extent
-      i ? points[i - 1][1] : a1, (a2 - a1) * t];
+      var p1 = anticlockwise ? a2 : a1;
+      var p2 = anticlockwise ? a1 : a2;
+      return [i ? points[i - 1][1] : p1, p1 + (p2 - p1) * t];
     }), attributes));
     return this;
   };
@@ -566,7 +571,7 @@ function () {
           break;
 
         case 'arc':
-          ctx.arc(_this.position[0], _this.position[1], instruction.attributes.radius, point[0], point[1]);
+          ctx.arc(_this.position[0], _this.position[1], instruction.attributes.radius, point[0], point[1], instruction.attributes.anticlockwise);
       } // If we're on the last `point` in the instruction, check for stroke and fill
       // attributes
 
@@ -601,7 +606,8 @@ function () {
 
     ctx.fillStyle = this.ctx.fillStyle;
     ctx.strokeStyle = this.ctx.strokeStyle;
-    this.position = this.origin;
+    this.position = this.origin; // Transformations on path run first (as they affect all paths within)
+
     this.transforms.forEach(function (inst, i) {
       _this.executeInstruction(ctx, inst);
     }); // First draw ALL paths that have completed...
@@ -665,7 +671,7 @@ var EASE;
 exports.default = (_a = {}, _a[EASE.LINEAR] = function (t) {
   return t;
 }, _a[EASE.IN_QUAD] = function (t) {
-  return t * t;
+  return t * t + 2 * t * (1 - t);
 }, _a[EASE.OUT_QUAD] = function (t) {
   return 1 - Math.pow(1 - t, 2);
 }, _a[EASE.IN_CUBIC] = function (t) {
@@ -673,7 +679,7 @@ exports.default = (_a = {}, _a[EASE.LINEAR] = function (t) {
 }, _a[EASE.OUT_CUBIC] = function (t) {
   return 1 - Math.pow(1 - t, 3);
 }, _a[EASE.IN_QUARTIC] = function (t) {
-  return t * t * t * t;
+  return t * t * t * t + (1 - t * t * t * t) * t;
 }, _a[EASE.OUT_QUARTIC] = function (t) {
   return 1 - Math.pow(1 - t, 4);
 }, _a[EASE.IN_SINE] = function (t) {
@@ -879,7 +885,8 @@ function () {
       lineWidth: this.lineWidth,
       miterLimit: this.miterLimit,
       lineCap: this.lineCap,
-      lineJoin: this.lineJoin
+      lineJoin: this.lineJoin,
+      anticlockwise: this.anticlockwise
     });
   };
 

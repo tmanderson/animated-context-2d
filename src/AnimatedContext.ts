@@ -29,6 +29,11 @@ export default class AnimatedContext2D {
    */
   fpms: number;
   /**
+   * Frame rate in milliseconds
+   * @type {number}
+   */
+  frameRate: number;
+  /**
    * Is the render loop running
    * @type {boolean}
    */
@@ -102,6 +107,7 @@ export default class AnimatedContext2D {
     this.fps = FPS;
     this.defaultEasing = defaultEasing;
     this.fpms = this.fps / 1000;
+    this.frameRate = 1000 / this.fps;
     // Adding any Context2D methods NOT handled by animated-context-2D
     for(var k in this.ctx) {
       if (k in this || typeof this.ctx[k] !== 'function') continue;
@@ -115,8 +121,10 @@ export default class AnimatedContext2D {
     this.paths.push(this.currentPath);
   }
 
-  arc(...args:[number, number, number, number]) {
-    this.currentPath.arc(...args);
+  arc(...args) {
+    const [x, y, r, startAngle, endAngle, anticlockwise, duration] = args;
+    this.currentPath.moveTo(x, y);
+    this.currentPath.arc(r, startAngle, endAngle, anticlockwise, duration);
   }
 
   arcTo(...args:[number, number, number, number, number]) {
@@ -139,8 +147,8 @@ export default class AnimatedContext2D {
     this.currentPath.skew(...args);
   }
 
-  rect(...args:[number, number, number, number]) {
-    this.currentPath.rect(...args);
+  rect(x0: number, y0: number, w: number, h: number) {
+    this.currentPath.rect(x0, y0, w, h);
   }
 
   rotate(angle: number) {
@@ -174,7 +182,7 @@ export default class AnimatedContext2D {
 
   tick = (ts) => {
     if (!this.running) return;
-    if (ts - this.time < this.fpms)
+    if (ts - this.time < this.frameRate)
       return window.requestAnimationFrame(this.tick);
 
     this.ctx.fillStyle = this.fillStyle;

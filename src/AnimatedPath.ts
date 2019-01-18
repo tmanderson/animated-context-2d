@@ -5,7 +5,10 @@ import AnimatedContext2D from './AnimatedContext';
 import PathInstruction from './PathInstruction';
 
 const interpolate = (frames: number, easing: EASE, getPoint: Function): [number, number][] =>
-  new Array(frames).fill(0).reduce((points, v, i) => points.concat([getPoint(ease[easing](i / (frames - 1)), i, points)]), []);
+  new Array(frames).fill(0).reduce((points, v, i) =>
+    points.concat([getPoint(ease[easing](i / (Math.max(2, frames) - 1)), i, points)]),
+    []
+  );
 
 export default class AnimatedPath2D {
   attributes: PathAttributes;
@@ -95,7 +98,7 @@ export default class AnimatedPath2D {
   }
 
   translate(x: number, y: number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(
       new PathInstruction(
         'translate',
@@ -113,7 +116,7 @@ export default class AnimatedPath2D {
   }
 
   scale(x: number, y: number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(
       new PathInstruction(
         'skew',
@@ -131,7 +134,7 @@ export default class AnimatedPath2D {
   }
 
   skew(x: number, y: number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(
       new PathInstruction(
         'skew',
@@ -147,7 +150,7 @@ export default class AnimatedPath2D {
   }
 
   rotate(a: number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.transforms.push(
       new PathInstruction(
         'rotate',
@@ -162,7 +165,7 @@ export default class AnimatedPath2D {
   }
 
   lineTo(x: number, y: number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.instructions.push(
       new PathInstruction(
         'lineTo',
@@ -182,13 +185,13 @@ export default class AnimatedPath2D {
   }
 
   rect(x: number, y: number, w: number, h:number, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+    const frames = Math.ceil(duration * this.ctx.fpms);
     this.instructions.push(
       new PathInstruction(
         'rect',
         interpolate(frames, this.easing, (t, i) => [
-          x, // (w * t)/2
-          y, // (h * t)/2
+          x + (w * (1 - t))/2,
+          y + (h * (1 - t))/2,
           w * t,
           h * t
         ]),
@@ -202,28 +205,32 @@ export default class AnimatedPath2D {
   }
 
   arcTo(x1:number, y1:number, x2: number, y2: number, r: number) {
-    // const frames = Math.round(duration * this.ctx.fpms);
+    // const frames = Math.ceil(duration * this.ctx.fpms);
     // TODO
     return this;
   }
 
-  arc(r: number, a1: number = 0, a2: number = 2 * Math.PI, duration: number = this.duration) {
-    const frames = Math.round(duration * this.ctx.fpms);
+  arc(r: number, a1: number = 0, a2: number = 2 * Math.PI, anticlockwise: boolean = false, duration: number = this.duration) {
+    const frames = Math.ceil(duration * this.ctx.fpms);
     const attributes = this.attributes.clone();
+
     attributes.radius = r;
+    attributes.anticlockwise = anticlockwise;
 
     this.instructions.push(
       new PathInstruction(
         'arc',
-        interpolate(frames, this.easing, (t, i, points) => [
-          // After first angle, the remaining just use the previous angle's extent
-          i ? points[i - 1][1] : a1,
-          (a2 - a1) * t
-        ]),
+        interpolate(frames, this.easing, (t, i, points) => {
+          const p1 = anticlockwise ? a2 : a1;
+          const p2 = anticlockwise ? a1 : a2;
+          return [
+            i ? points[i - 1][1] : p1,
+            p1 + (p2 - p1) * t
+          ]
+        }),
         attributes
       )
     );
-
     return this;
   }
 
@@ -265,7 +272,8 @@ export default class AnimatedPath2D {
             this.position[1],
             instruction.attributes.radius,
             point[0],
-            point[1]
+            point[1],
+            instruction.attributes.anticlockwise
           );
       }
       // If we're on the last `point` in the instruction, check for stroke and fill
@@ -298,11 +306,11 @@ export default class AnimatedPath2D {
     ctx.fillStyle = this.ctx.fillStyle;
     ctx.strokeStyle = this.ctx.strokeStyle;
     this.position = this.origin;
-
+    // Transformations on path run first (as they affect all paths within)
     this.transforms.forEach((inst, i) => {
       this.executeInstruction(ctx, inst);
     });
-    
+
     // First draw ALL paths that have completed...
     this.instructions.slice(0, this.progress).forEach((inst, i) => {
       ctx.beginPath();

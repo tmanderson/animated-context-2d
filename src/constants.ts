@@ -13,6 +13,7 @@ export enum Context2DLineJoin {
 interface IPathAttributes {
   fill?: boolean
   stroke?: boolean
+  anticlockwise?: boolean
   radius?: number
   fillStyle: string
   strokeStyle: string
@@ -26,6 +27,7 @@ export class PathAttributes implements IPathAttributes {
   fill?: boolean;
   stroke?: boolean;
   radius?: number;
+  anticlockwise?: boolean;
   fillStyle: string = 'rgba(255, 255, 255, 1)';
   strokeStyle: string = 'rgba(0, 0, 0, 1)';
   lineWidth: number = 1;
@@ -47,7 +49,8 @@ export class PathAttributes implements IPathAttributes {
       lineWidth: this.lineWidth,
       miterLimit: this.miterLimit,
       lineCap: this.lineCap,
-      lineJoin: this.lineJoin
+      lineJoin: this.lineJoin,
+      anticlockwise: this.anticlockwise
     });
   }
 }
