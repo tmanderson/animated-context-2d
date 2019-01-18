@@ -16,7 +16,7 @@ specification of duration and easing function given to `beginPath`)
 ```js
 const ctx = new AnimatedContext2D(canvas); // use this EXACTLY like `Context2D`, animations are FREE!
 
-ctx.beginPath(500, AnimatedContext2D.EASE.OUT_CUBIC); // Note: the extra arguments
+ctx.beginPath(500, "out.cubic"); // Note: the extra arguments
 ctx.strokeStyle = 'red';
 ctx.lineWidth = 2;
 ctx.translate(100, 100);
@@ -43,26 +43,27 @@ ctx.stroke();
 The duration and easing are used for each path instruction. So the following
 
 ```js
+// begin a new path, with 500ms animation durations using `in.quad` easing function
 ctx.beginPath(500, "in.quad");
-ctx.lineTo(10, 10); // 500ms
-ctx.rect(0, 0, 100, 100); // 500ms
+ctx.lineTo(10, 10);
+ctx.rect(0, 0, 100, 100);
 ctx.fill();
 ```
 
 would take 500ms to complete and both the `lineTo` and `rect` would use `EASE.IN_QUAD`.
 
-## Easing functions
-- [x] `LINEAR`
-- [x] `IN_QUAD`
-- [x] `OUT_QUAD`
-- [x] `IN_CUBIC`
-- [x] `OUT_CUBIC`
-- [x] `IN_QUARTIC`
-- [x] `OUT_QUARTIC`
-- [x] `IN_SINE`
-- [x] `OUT_SINE`
-- [x] `IN_EXPO`
-- [x] `OUT_EXPO`
+## [Easing functions](src/Easing.ts)
+- [x] `LINEAR = ("linear")`
+- [x] `IN_QUAD = ("in.quad")`
+- [x] `OUT_QUAD = ("out.quad")`
+- [x] `IN_CUBIC = ("in.cubic")`
+- [x] `OUT_CUBIC = ("out.cubic")`
+- [x] `IN_QUARTIC = ("in.quartic")`
+- [x] `OUT_QUARTIC = ("out.quartic")`
+- [x] `IN_SINE = ("in.sine")`
+- [x] `OUT_SINE = ("out.sine")`
+- [x] `IN_EXPO = ("in.expo")`
+- [x] `OUT_EXPO = ("out.expo")`
 
 ## Animated Context2D Method Support
 All Context2D methods are available on the `AnimatedContext` instance, so you
