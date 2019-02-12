@@ -56,6 +56,8 @@ function () {
       _this.paths.forEach(function (path) {
         var _a;
 
+        if (path.complete) path.reset();
+
         _this.ctx.save();
 
         (_a = _this.ctx).transform.apply(_a, path.transform.args());
@@ -631,10 +633,11 @@ function () {
   };
 
   AnimatedPath2D.prototype.reset = function () {
-    this.progress = 0;
     this.instructions.forEach(function (instruction) {
       return instruction.reset();
     });
+    this.complete = false;
+    this.progress = 0;
   };
 
   return AnimatedPath2D;

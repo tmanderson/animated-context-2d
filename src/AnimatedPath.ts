@@ -330,7 +330,8 @@ export default class AnimatedPath2D {
   }
 
   reset() {
-    this.progress = 0;
     this.instructions.forEach(instruction => instruction.reset());
+    this.complete = false;
+    this.progress = 0;
   }
 }

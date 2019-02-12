@@ -21,57 +21,73 @@
     const d = 500;
     const ctx = new AnimatedContext2D(canvas);
 
-    ctx.beginPath(d, "out.cubic"); // Note: the extra arguments
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#333';
-    ctx.arc(canvas.width/2, canvas.height/2, 50, 0, 2 * Math.PI, true);
-    ctx.fill();
-    ctx.stroke();
+    function draw(x, y) {
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(55, 128, 199, 1)';
-    ctx.arc(canvas.width/2, canvas.height/2, 60, Math.PI / 4, 3 * Math.PI / 4);
-    ctx.stroke();
+      ctx.beginPath(d, "out.cubic"); // Note: the extra arguments
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#333';
+      ctx.arc(x, y, 50, 0, 2 * Math.PI, true);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(245, 198, 63, 1)';
-    ctx.arc(canvas.width/2, canvas.height/2, 65, -Math.PI / 4, Math.PI / 4);
-    ctx.stroke();
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(55, 128, 199, 1)';
+      ctx.arc(x, y, 60, Math.PI / 4, 3 * Math.PI / 4, true);
+      ctx.stroke();
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(173, 48, 73, 1)';
-    ctx.arc(canvas.width/2, canvas.height/2, 60, -3 * Math.PI / 4, -Math.PI / 4);
-    ctx.stroke();
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(245, 198, 63, 1)';
+      ctx.arc(x, y, 65, -Math.PI / 4, Math.PI / 4);
+      ctx.stroke();
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(64, 143, 78, 1)';
-    ctx.arc(canvas.width/2, canvas.height/2, 65, 3 * Math.PI / 4, 3 * Math.PI / 4 + Math.PI / 2);
-    ctx.stroke();
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(173, 48, 73, 1)';
+      ctx.arc(x, y, 60, -3 * Math.PI / 4, -Math.PI / 4);
+      ctx.stroke();
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(55, 55, 55, 0.25)';
-    ctx.rect(
-      canvas.width/2 - 50,
-      canvas.height/2 - 50,
-      100,
-      100
-    );
-    ctx.stroke();
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(64, 143, 78, 1)';
+      ctx.arc(x, y, 65, 3 * Math.PI / 4, 3 * Math.PI / 4 + Math.PI / 2, true);
+      ctx.stroke();
 
-    ctx.beginPath(d, "out.expo");
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(55, 55, 55, 0.25)';
-    ctx.rect(
-      canvas.width/2 - 25 * 1.41,
-      canvas.height/2 - 25 * 1.41,
-      50 * 1.41,
-      50 * 1.41
-    );
-    ctx.stroke();
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(55, 55, 55, 0.25)';
+      ctx.rect(
+        x - 50,
+        y - 50,
+        100,
+        100
+      );
+      ctx.stroke();
+
+      ctx.beginPath(d, "out.expo");
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'rgba(55, 55, 55, 0.25)';
+      ctx.rect(
+        x - 25 * 1.41,
+        y - 25 * 1.41,
+        50 * 1.41,
+        50 * 1.41
+      );
+      ctx.stroke();
+    }
+
+    const h = canvas.height / 140;
+    const w = canvas.width / 140;
+
+    for(var i = 0; i < h; i++) {
+      for(var j = 0; j < w; j++) {
+        draw(70 + 140 * j, 140 * i)
+        // (function(i, j) { setTimeout(() => draw(70 + 140 * j, 140 * i), i * 500 + j * 50)})(i, j);
+      }
+    }
+
+    setTimeout(() => ctx.reset(), 800);
+
   </script>
 </html>

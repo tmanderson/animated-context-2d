@@ -189,6 +189,7 @@ export default class AnimatedContext2D {
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     this.paths.forEach(path => {
+      if (path.complete) path.reset();
       this.ctx.save();
       this.ctx.transform(...path.transform.args());
       path.render(this.ctx, this.frame, this.time);
